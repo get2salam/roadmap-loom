@@ -172,6 +172,9 @@ const refs = {
 const toastHost = (() => {
   const host = document.createElement('div');
   host.className = 'toast-host';
+  host.setAttribute('role', 'status');
+  host.setAttribute('aria-live', 'polite');
+  host.setAttribute('aria-atomic', 'true');
   document.body.appendChild(host);
   return host;
 })();
@@ -229,6 +232,10 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, Number(value)));
 }
 
+function sanitizeDate(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : '';
+}
+
 function completedStates() {
   return new Set(SPEC.completedStates || []);
 }
@@ -257,7 +264,7 @@ function normalize(item = {}) {
     metric: clamp(item.metric ?? SPEC.metric.default ?? 6, SPEC.metric.min, SPEC.metric.max),
     textOne: item.textOne || SPEC.textOne.default,
     textTwo: item.textTwo || SPEC.textTwo.default,
-    date: item.date || todayISO(3),
+    date: sanitizeDate(item.date) || todayISO(3),
   };
 }
 
@@ -551,7 +558,7 @@ function renderEditor(item) {
       <div class="field-grid">
         <label class="field">
           <span>${SPEC.date.label}</span>
-          <input type="date" data-item-field="date" value="${item.date}" />
+          <input type="date" data-item-field="date" value="${escapeHtml(item.date)}" />
         </label>
         <label class="field range-wrap">
           <span>${SPEC.metric.label}</span>
