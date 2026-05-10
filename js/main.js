@@ -380,12 +380,20 @@ function exportState() {
 async function importState(file) {
   const raw = await file.text();
   const parsed = JSON.parse(raw);
-  commit({
-    ...seedState(),
-    ...parsed,
-    items: (parsed.items || []).map((item) => normalize(item)),
-    ui: { ...seedState().ui, ...(parsed.ui || {}) },
-  });
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Backup must be a JSON object.');
+  }
+  if (parsed.items !== undefined && !Array.isArray(parsed.items)) {
+    throw new Error('Backup "items" must be an array.');
+  }
+  const next = seedState();
+  if (typeof parsed.boardTitle === 'string') next.boardTitle = parsed.boardTitle;
+  if (typeof parsed.boardSubtitle === 'string') next.boardSubtitle = parsed.boardSubtitle;
+  next.items = (parsed.items || []).map((item) => normalize(item));
+  if (parsed.ui && typeof parsed.ui === 'object' && !Array.isArray(parsed.ui)) {
+    next.ui = { ...next.ui, ...parsed.ui };
+  }
+  commit(next);
   showToast('Imported backup.');
 }
 
