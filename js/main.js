@@ -252,19 +252,20 @@ function toneForDate(item) {
   return 'success';
 }
 
-function normalize(item = {}) {
+function normalize(item) {
+  const source = item && typeof item === 'object' && !Array.isArray(item) ? item : {};
   return {
-    id: item.id || uid(),
-    title: item.title || `New ${SPEC.itemLabel}`,
-    note: item.note || SPEC.defaults.note,
-    category: SPEC.categories.includes(item.category) ? item.category : SPEC.categories[0],
-    state: SPEC.states.includes(item.state) ? item.state : SPEC.states[0],
-    score: clamp(item.score ?? 7, 1, 10),
-    effort: clamp(item.effort ?? 3, 1, 10),
-    metric: clamp(item.metric ?? SPEC.metric.default ?? 6, SPEC.metric.min, SPEC.metric.max),
-    textOne: item.textOne || SPEC.textOne.default,
-    textTwo: item.textTwo || SPEC.textTwo.default,
-    date: sanitizeDate(item.date) || todayISO(3),
+    id: source.id || uid(),
+    title: source.title || `New ${SPEC.itemLabel}`,
+    note: source.note || SPEC.defaults.note,
+    category: SPEC.categories.includes(source.category) ? source.category : SPEC.categories[0],
+    state: SPEC.states.includes(source.state) ? source.state : SPEC.states[0],
+    score: clamp(source.score ?? 7, 1, 10),
+    effort: clamp(source.effort ?? 3, 1, 10),
+    metric: clamp(source.metric ?? SPEC.metric.default ?? 6, SPEC.metric.min, SPEC.metric.max),
+    textOne: source.textOne || SPEC.textOne.default,
+    textTwo: source.textTwo || SPEC.textTwo.default,
+    date: sanitizeDate(source.date) || todayISO(3),
   };
 }
 
@@ -386,10 +387,16 @@ async function importState(file) {
   if (parsed.items !== undefined && !Array.isArray(parsed.items)) {
     throw new Error('Backup "items" must be an array.');
   }
+  const sourceItems = parsed.items || [];
+  sourceItems.forEach((entry, index) => {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      throw new Error(`Backup item at index ${index} must be an object.`);
+    }
+  });
   const next = seedState();
   if (typeof parsed.boardTitle === 'string') next.boardTitle = parsed.boardTitle;
   if (typeof parsed.boardSubtitle === 'string') next.boardSubtitle = parsed.boardSubtitle;
-  next.items = (parsed.items || []).map((item) => normalize(item));
+  next.items = sourceItems.map((item) => normalize(item));
   if (parsed.ui && typeof parsed.ui === 'object' && !Array.isArray(parsed.ui)) {
     next.ui = { ...next.ui, ...parsed.ui };
   }
