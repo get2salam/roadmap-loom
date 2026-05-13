@@ -380,7 +380,12 @@ function exportState() {
 
 async function importState(file) {
   const raw = await file.text();
-  const parsed = JSON.parse(raw);
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error('Backup is not valid JSON.');
+  }
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
     throw new Error('Backup must be a JSON object.');
   }
@@ -708,7 +713,8 @@ document.addEventListener('change', async (event) => {
       await importState(file);
     } catch (error) {
       console.error(error);
-      showToast('Import failed.');
+      const reason = error && typeof error.message === 'string' ? error.message : '';
+      showToast(reason ? `Import failed: ${reason}` : 'Import failed.');
     } finally {
       event.target.value = '';
     }
@@ -717,6 +723,7 @@ document.addEventListener('change', async (event) => {
 
 document.addEventListener('keydown', (event) => {
   if (event.target.closest('input, textarea, select')) return;
+  if (event.ctrlKey || event.metaKey || event.altKey) return;
   if (event.key.toLowerCase() === 'n') {
     event.preventDefault();
     addItem();
