@@ -397,11 +397,20 @@ async function importState(file) {
     if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
       throw new Error(`Backup item at index ${index} must be an object.`);
     }
+    if (entry.id !== undefined && (typeof entry.id !== 'string' || !entry.id)) {
+      throw new Error(`Backup item at index ${index} has an invalid id.`);
+    }
   });
   const next = seedState();
   if (typeof parsed.boardTitle === 'string') next.boardTitle = parsed.boardTitle;
   if (typeof parsed.boardSubtitle === 'string') next.boardSubtitle = parsed.boardSubtitle;
-  next.items = sourceItems.map((item) => normalize(item));
+  const seenIds = new Set();
+  next.items = sourceItems.map((item) => {
+    const normalized = normalize(item);
+    if (seenIds.has(normalized.id)) normalized.id = uid();
+    seenIds.add(normalized.id);
+    return normalized;
+  });
   if (parsed.ui && typeof parsed.ui === 'object' && !Array.isArray(parsed.ui)) {
     next.ui = { ...next.ui, ...parsed.ui };
   }
