@@ -412,7 +412,17 @@ async function importState(file) {
     return normalized;
   });
   if (parsed.ui && typeof parsed.ui === 'object' && !Array.isArray(parsed.ui)) {
-    next.ui = { ...next.ui, ...parsed.ui };
+    const incoming = parsed.ui;
+    if (typeof incoming.search === 'string') next.ui.search = incoming.search;
+    if (incoming.category === 'all' || SPEC.categories.includes(incoming.category)) {
+      next.ui.category = incoming.category;
+    }
+    if (incoming.status === 'all' || SPEC.states.includes(incoming.status)) {
+      next.ui.status = incoming.status;
+    }
+    if (typeof incoming.selectedId === 'string' && next.items.some((item) => item.id === incoming.selectedId)) {
+      next.ui.selectedId = incoming.selectedId;
+    }
   }
   commit(next);
   showToast('Imported backup.');
