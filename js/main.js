@@ -393,6 +393,8 @@ async function importState(file) {
     throw new Error('Backup "items" must be an array.');
   }
   const sourceItems = parsed.items || [];
+  const textFields = ['title', 'note', 'textOne', 'textTwo'];
+  const numberFields = ['score', 'effort', 'metric'];
   sourceItems.forEach((entry, index) => {
     if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
       throw new Error(`Backup item at index ${index} must be an object.`);
@@ -400,6 +402,16 @@ async function importState(file) {
     if (entry.id !== undefined && (typeof entry.id !== 'string' || !entry.id)) {
       throw new Error(`Backup item at index ${index} has an invalid id.`);
     }
+    textFields.forEach((field) => {
+      if (entry[field] !== undefined && typeof entry[field] !== 'string') {
+        throw new Error(`Backup item at index ${index} has an invalid ${field}.`);
+      }
+    });
+    numberFields.forEach((field) => {
+      if (entry[field] !== undefined && (typeof entry[field] !== 'number' || !Number.isFinite(entry[field]))) {
+        throw new Error(`Backup item at index ${index} has an invalid ${field}.`);
+      }
+    });
   });
   const next = seedState();
   if (typeof parsed.boardTitle === 'string') next.boardTitle = parsed.boardTitle;
