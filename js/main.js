@@ -378,8 +378,18 @@ function exportState() {
   showToast('Downloaded backup.');
 }
 
+const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
+
 async function importState(file) {
+  if (typeof file.size === 'number' && file.size > MAX_IMPORT_BYTES) {
+    const limitMb = (MAX_IMPORT_BYTES / (1024 * 1024)).toFixed(0);
+    throw new Error(`Backup is larger than the ${limitMb}MB import limit.`);
+  }
   const raw = await file.text();
+  if (raw.length > MAX_IMPORT_BYTES) {
+    const limitMb = (MAX_IMPORT_BYTES / (1024 * 1024)).toFixed(0);
+    throw new Error(`Backup is larger than the ${limitMb}MB import limit.`);
+  }
   let parsed;
   try {
     parsed = JSON.parse(raw);
