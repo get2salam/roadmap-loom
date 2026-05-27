@@ -422,6 +422,17 @@ async function importState(file) {
         throw new Error(`Backup item at index ${index} has an invalid ${field}.`);
       }
     });
+    if (entry.category !== undefined && !SPEC.categories.includes(entry.category)) {
+      throw new Error(`Backup item at index ${index} has an unknown category.`);
+    }
+    if (entry.state !== undefined && !SPEC.states.includes(entry.state)) {
+      throw new Error(`Backup item at index ${index} has an unknown state.`);
+    }
+    if (entry.date !== undefined) {
+      if (typeof entry.date !== 'string' || (entry.date !== '' && !/^\d{4}-\d{2}-\d{2}$/.test(entry.date))) {
+        throw new Error(`Backup item at index ${index} has an invalid date.`);
+      }
+    }
   });
   const next = seedState();
   if (typeof parsed.boardTitle === 'string') next.boardTitle = parsed.boardTitle;
