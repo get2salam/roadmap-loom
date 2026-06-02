@@ -232,8 +232,17 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, Number(value)));
 }
 
+function isValidISODate(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year
+    && date.getUTCMonth() === month - 1
+    && date.getUTCDate() === day;
+}
+
 function sanitizeDate(value) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : '';
+  return isValidISODate(value) ? value : '';
 }
 
 function completedStates() {
@@ -429,7 +438,7 @@ async function importState(file) {
       throw new Error(`Backup item at index ${index} has an unknown state.`);
     }
     if (entry.date !== undefined) {
-      if (typeof entry.date !== 'string' || (entry.date !== '' && !/^\d{4}-\d{2}-\d{2}$/.test(entry.date))) {
+      if (typeof entry.date !== 'string' || (entry.date !== '' && !isValidISODate(entry.date))) {
         throw new Error(`Backup item at index ${index} has an invalid date.`);
       }
     }
