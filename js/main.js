@@ -388,6 +388,16 @@ function exportState() {
 }
 
 const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
+const MAX_FIELD_LENGTHS = {
+  id: 64,
+  title: 200,
+  textOne: 200,
+  textTwo: 200,
+  note: 2000,
+  boardTitle: 200,
+  boardSubtitle: 280,
+  search: 200,
+};
 
 async function importState(file) {
   if (typeof file.size === 'number' && file.size > MAX_IMPORT_BYTES) {
@@ -418,12 +428,22 @@ async function importState(file) {
     if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
       throw new Error(`Backup item at index ${index} must be an object.`);
     }
-    if (entry.id !== undefined && (typeof entry.id !== 'string' || !entry.id)) {
-      throw new Error(`Backup item at index ${index} has an invalid id.`);
+    if (entry.id !== undefined) {
+      if (typeof entry.id !== 'string' || !entry.id) {
+        throw new Error(`Backup item at index ${index} has an invalid id.`);
+      }
+      if (entry.id.length > MAX_FIELD_LENGTHS.id) {
+        throw new Error(`Backup item at index ${index} has an id longer than ${MAX_FIELD_LENGTHS.id} characters.`);
+      }
     }
     textFields.forEach((field) => {
-      if (entry[field] !== undefined && typeof entry[field] !== 'string') {
+      if (entry[field] === undefined) return;
+      if (typeof entry[field] !== 'string') {
         throw new Error(`Backup item at index ${index} has an invalid ${field}.`);
+      }
+      const limit = MAX_FIELD_LENGTHS[field];
+      if (entry[field].length > limit) {
+        throw new Error(`Backup item at index ${index} has a ${field} longer than ${limit} characters.`);
       }
     });
     numberFields.forEach((field) => {
@@ -444,8 +464,12 @@ async function importState(file) {
     }
   });
   const next = seedState();
-  if (typeof parsed.boardTitle === 'string') next.boardTitle = parsed.boardTitle;
-  if (typeof parsed.boardSubtitle === 'string') next.boardSubtitle = parsed.boardSubtitle;
+  if (typeof parsed.boardTitle === 'string' && parsed.boardTitle.length <= MAX_FIELD_LENGTHS.boardTitle) {
+    next.boardTitle = parsed.boardTitle;
+  }
+  if (typeof parsed.boardSubtitle === 'string' && parsed.boardSubtitle.length <= MAX_FIELD_LENGTHS.boardSubtitle) {
+    next.boardSubtitle = parsed.boardSubtitle;
+  }
   const seenIds = new Set();
   next.items = sourceItems.map((item) => {
     const normalized = normalize(item);
@@ -455,7 +479,9 @@ async function importState(file) {
   });
   if (parsed.ui && typeof parsed.ui === 'object' && !Array.isArray(parsed.ui)) {
     const incoming = parsed.ui;
-    if (typeof incoming.search === 'string') next.ui.search = incoming.search;
+    if (typeof incoming.search === 'string' && incoming.search.length <= MAX_FIELD_LENGTHS.search) {
+      next.ui.search = incoming.search;
+    }
     if (incoming.category === 'all' || SPEC.categories.includes(incoming.category)) {
       next.ui.category = incoming.category;
     }
