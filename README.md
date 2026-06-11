@@ -31,6 +31,16 @@ python -m http.server 8000
 
 Then open <http://localhost:8000>.
 
+## Local verification
+
+Roadmap Loom has a dependency-free static verification check for CI and local review:
+
+```bash
+npm run verify
+```
+
+It syntax-checks the JavaScript entrypoint and confirms the HTML, CSS, roadmap actions, import guard, and DOM bindings stay wired together.
+
 ## Keyboard shortcuts
 
 - `N` creates a new initiative
