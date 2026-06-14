@@ -39,7 +39,7 @@ Roadmap Loom has a dependency-free static verification check for CI and local re
 npm run verify
 ```
 
-It syntax-checks the JavaScript entrypoint and confirms the HTML, CSS, roadmap actions, import guard, and DOM bindings stay wired together.
+It syntax-checks the JavaScript entrypoint and confirms the HTML, CSS, roadmap actions, import guard, DOM bindings, package scripts, and GitHub Actions workflow stay wired together. CI runs the same command with read-only repository permissions and a short timeout, so local failures should match pull-request failures.
 
 ## Keyboard shortcuts
 
