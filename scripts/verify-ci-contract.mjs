@@ -20,6 +20,7 @@ const pkg = JSON.parse(packageJson);
 const scripts = pkg.scripts || {};
 
 assert(scripts.verify?.includes('node --check js/main.js'), 'npm run verify must syntax-check js/main.js');
+assert(scripts.verify?.includes('node --test tests/*.test.mjs'), 'npm run verify must run product regression tests without quoted globs');
 assert(scripts.verify?.includes('scripts/verify-static.mjs'), 'npm run verify must include the static app verifier');
 assert(scripts.verify?.includes('scripts/verify-ci-contract.mjs'), 'npm run verify must include the CI contract verifier');
 assert(scripts['verify:static'] === 'node scripts/verify-static.mjs', 'verify:static should run the static verifier directly');

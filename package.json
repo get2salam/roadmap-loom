@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "verify": "node --check js/main.js && node --check scripts/verify-static.mjs && node --check scripts/verify-ci-contract.mjs && npm run verify:static && npm run verify:ci",
+    "verify": "node --check js/main.js && node --check scripts/verify-static.mjs && node --check scripts/verify-ci-contract.mjs && node --test tests/*.test.mjs && npm run verify:static && npm run verify:ci",
     "verify:static": "node scripts/verify-static.mjs",
     "verify:ci": "node scripts/verify-ci-contract.mjs"
   }

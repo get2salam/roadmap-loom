@@ -229,7 +229,9 @@ function escapeHtml(value) {
 }
 
 function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, Number(value)));
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return min;
+  return Math.max(min, Math.min(max, numeric));
 }
 
 function isValidISODate(value) {
