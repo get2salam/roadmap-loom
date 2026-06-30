@@ -17,6 +17,28 @@ Roadmap Loom is a local-first workspace for founders, operators, and solo builde
 - quick action: **Raise confidence**
 - quick action: **Mark shipped**
 
+## How ranking works
+
+Each initiative receives a numeric priority score that drives the board sort order:
+
+```
+priority = impact×6 + confidence×5 + dueBoost + stateWeight − effort×4
+```
+
+| Component     | Detail                                                            |
+|---------------|-------------------------------------------------------------------|
+| `impact`      | 1–10, weighted ×6                                                 |
+| `confidence`  | 1–10, weighted ×5                                                 |
+| `dueBoost`    | `max(0, 4 − daysUntilDue) × 4`, zero for shipped initiatives     |
+| `stateWeight` | Draft 2 · Sequenced 7 · Committed 10 · Shipped 3                 |
+| `effort`      | 1–10 complexity, weighted ×4 as a penalty                         |
+
+A committed initiative with impact 9, confidence 8, and effort 3 scores **92** (54 + 40 + 10 − 12). To see how the seed initiatives rank locally, run the included preview:
+
+```bash
+node scripts/score-preview.mjs
+```
+
 ## Why it feels different
 
 Roadmap Loom is not just a generic list. It is shaped around the real workflow behind initiatives, so the board helps you decide what matters next instead of simply storing records.
